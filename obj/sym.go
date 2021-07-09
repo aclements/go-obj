@@ -126,11 +126,20 @@ func (s SymFlags) String() string {
 }
 
 // Data reads size bytes of data from this symbol, starting at the given
-// address. It panics if s is not backed by data or the requested byte range is
-// out of range for the section.
+// address. If s is an undefined symbol or otherwise not backed by data,
+// it returns an ErrNoData error. It panics if the requested byte range
+// is out of range for the section.
 func (s *Sym) Data(addr, size uint64) (*Data, error) {
 	if s.Section == nil {
-		panic("Sym has no data")
+		// We return an error rather than panic so that "Data" is useful
+		// as a general-purpose interface.
+		switch s.Kind {
+		case SymUndef:
+			return nil, &ErrNoData{"undefined symbol"}
+		case SymAbsolute:
+			return nil, &ErrNoData{"absolute symbol"}
+		}
+		return nil, &ErrNoData{"unknown reason"}
 	}
 	if addr < s.Value || addr+size > s.Value+s.Size {
 		panic(fmt.Sprintf("requested data [0x%x, 0x%x) is outside symbol [0x%x, 0x%x)", addr, addr+size, s.Value, s.Value+s.Size))
@@ -139,9 +148,19 @@ func (s *Sym) Data(addr, size uint64) (*Data, error) {
 }
 
 // Bounds returns the starting address and size in bytes of symbol s.
+// For undefined symbols, it returns 0, 0.
 func (s *Sym) Bounds() (addr, size uint64) {
 	if s.Section == nil {
-		panic("Sym has no data")
+		return 0, 0
 	}
 	return s.Value, s.Size
+}
+
+// An ErrNoData error indicates that an entity is not backed by data.
+type ErrNoData struct {
+	Detail string
+}
+
+func (e *ErrNoData) Error() string {
+	return fmt.Sprintf("no data: %s", e.Detail)
 }
