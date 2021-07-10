@@ -15,9 +15,6 @@ import (
 
 // TODO: Raw file header bytes? Generic metadata representation for headers?
 
-// TODO: Add a utility that synthesizes missing symbol sizes. (This
-// probably has to load the entire symbol table to work.)
-
 // Open attempts to open r as a known object file format.
 func Open(r io.ReaderAt) (File, error) {
 	if isElf, f, err := openElf(r); isElf {

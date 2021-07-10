@@ -90,7 +90,7 @@ type symFlags uint8
 const (
 	symFlagLocal symFlags = 1 << iota
 
-	// TODO: Flag indicating size is synthesized?
+	symFlagSizeSynthesized
 
 	// TODO: Indicate which symbol table this comes from for formats that
 	// support more than one? (ELF has static and dynamic symbols.)
@@ -111,15 +111,36 @@ func (s *SymFlags) SetLocal(v bool) {
 	}
 }
 
+// SizeSynthesized indicates a symbol's size was synthensized using heuristics.
+func (s SymFlags) SizeSynthesized() bool {
+	return s.f&symFlagSizeSynthesized != 0
+}
+
+// SetSizeSynthesized set the SizeSynthesized flag to v.
+func (s *SymFlags) SetSizeSynthesized(v bool) {
+	if v {
+		s.f |= symFlagSizeSynthesized
+	} else {
+		s.f &^= symFlagSizeSynthesized
+	}
+}
+
 // String returns a string representation of the flags set in s.
 func (s SymFlags) String() string {
 	if s.f == 0 {
 		return "{}"
 	}
 	var buf strings.Builder
-	buf.WriteByte('{')
+	var sep byte = '{'
 	if s.Local() {
+		buf.WriteByte(sep)
 		buf.WriteString("Local")
+		sep = ','
+	}
+	if s.SizeSynthesized() {
+		buf.WriteByte(sep)
+		buf.WriteString("SizeSynthesized")
+		sep = ','
 	}
 	buf.WriteByte('}')
 	return buf.String()
