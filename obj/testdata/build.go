@@ -192,12 +192,23 @@ func (c config) printElfTest(path string) {
 		name := info[0]
 		addr := atoi("0x" + info[2])
 		size := atoi("0x" + info[4])
-		if strings.Contains(info[6], "C") {
+		flags := info[6]
+		if strings.Contains(flags, "C") {
 			// Compressed section. Obj hides this. Let readelf decompress it.
 			d := sectionData(path, name)
 			size = len(d)
 		}
-		fmt.Fprintf(b, "{Name: %q, ID: %d, RawID: %d, Addr: %#x, Size: %#x},\n", name, rawID-1, rawID, addr, size)
+		sectionFlags := []string{}
+		if strings.Contains(flags, "A") && c.typ != "rel" {
+			sectionFlags = append(sectionFlags, "sectionFlagMapped")
+		}
+		if !strings.Contains(flags, "W") {
+			sectionFlags = append(sectionFlags, "sectionFlagReadOnly")
+		}
+		if info[1] == "NOBITS" {
+			sectionFlags = append(sectionFlags, "sectionFlagZeroInitialized")
+		}
+		fmt.Fprintf(b, "{Name: %q, ID: %d, RawID: %d, Addr: %#x, Size: %#x, SectionFlags: SectionFlags{%s}},\n", name, rawID-1, rawID, addr, size, strings.Join(sectionFlags, "|"))
 	}
 	fmt.Fprintf(b, "},\n")
 

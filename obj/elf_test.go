@@ -226,6 +226,9 @@ func TestElfSections(t *testing.T) {
 				if sect.Addr != want.Addr || sect.Size != want.Size {
 					t.Errorf("section %s: want address/size %#x/%#x, got %#x/%#x", sect.Name, want.Addr, want.Size, sect.Addr, sect.Size)
 				}
+				if sect.SectionFlags != want.SectionFlags {
+					t.Errorf("section %s: want flags %v, got %v", sect.Name, want.SectionFlags, sect.SectionFlags)
+				}
 			}
 		}
 
