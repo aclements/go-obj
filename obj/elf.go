@@ -34,8 +34,8 @@ type elfFile struct {
 	relSize, relaSize uint64
 
 	// relocatable is true if this is a REL-type file. In this case,
-	// there's no meaningful "loaded" address space and relocations
-	// store section-relative offsets instead of virtual addresses.
+	// there's no meaningful mapped address space and relocations store
+	// section-relative offsets instead of virtual addresses.
 	relocatable bool
 
 	// sections contains the sections of this object file, indexed by
@@ -130,6 +130,12 @@ func openElf(r io.ReaderAt) (bool, File, error) {
 			Addr:  elfSect.Addr,
 			Size:  elfSect.Size,
 		}
+		if !f.relocatable && elfSect.Flags&elf.SHF_ALLOC != 0 {
+			// We ignore allocatable sections in reloctable objects:
+			// these sections turn into mapped sections *after linking*,
+			// but don't have meaningful addresses right now.
+			s.SetMapped(true)
+		}
 		if elfSect.Flags&elf.SHF_WRITE == 0 {
 			s.SetReadOnly(true)
 		}
@@ -150,7 +156,7 @@ func openElf(r io.ReaderAt) (bool, File, error) {
 		case elf.SHT_REL, elf.SHT_RELA:
 			relSections = append(relSections, es)
 		}
-		if elfSect.Flags&elf.SHF_ALLOC != 0 && es.relocatable() {
+		if elfSect.Flags&elf.SHF_ALLOC != 0 && es.canHaveRelocs() {
 			// Add to the list of sections to which section-less
 			// relocations apply. Section-less relocations only get
 			// applied to sections that are actually loaded
@@ -210,7 +216,7 @@ func openElf(r io.ReaderAt) (bool, File, error) {
 			if !ok {
 				return true, nil, fmt.Errorf("relocation section %s references missing target section %d", es, shnTarget)
 			}
-			if target.relocatable() {
+			if target.canHaveRelocs() {
 				target.relocSections = append(target.relocSections, es)
 				es.rel.target = target
 			}
@@ -319,14 +325,14 @@ func (s *elfSection) String() string {
 	return fmt.Sprintf("%s [%d]", s.Name, s.RawID)
 }
 
-// relocatable returns whether this section can have relocations
+// canHaveRelocs returns whether this section can have relocations
 // applied.
 //
 // We narrow this down because otherwise its common to see, e.g., a
 // relocation section that applies to itself (because it applies to all
 // loadable sections), which tends to lead to infinite loops. We don't
 // want to apply relocations to any ELF metadata sections.
-func (s *elfSection) relocatable() bool {
+func (s *elfSection) canHaveRelocs() bool {
 	return s.elf.Type == elf.SHT_PROGBITS || s.elf.Type == elf.SHT_NOBITS || s.elf.Type >= elf.SHT_LOPROC
 }
 

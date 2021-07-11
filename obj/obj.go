@@ -51,9 +51,9 @@ type File interface {
 	// relocation targets, etc. are relative to some section of the
 	// object file. Each section may or may not have a fixed base
 	// address and sections may overlap. For example, in an executable
-	// image, all of the loadable sections will have base addresses and
+	// image, all of the mapped sections will have base addresses and
 	// will not overlap, but there may be additional information in
-	// non-loadable sections such as debugging info. In an unlinked
+	// non-mapped sections such as debugging info. In an unlinked
 	// object file, typically none of the sections have base addresses.
 	// And in a position-independent executable, sections may have base
 	// addresses, but may be relocated to another address.
@@ -68,16 +68,19 @@ type File interface {
 	sectionData(s *Section, addr, size uint64, d *Data) (*Data, error)
 
 	// ResolveAddr finds the Section containing the given address in the
-	// "loaded" address space. It returns nil if addr is not in the
-	// loaded address space. Not all sections are loaded, and some types
-	// of object files don't have any loaded address space at all (for
-	// example, ELF relocatable objects).
+	// mapped address space. It returns nil if addr is not in a mapped
+	// section. Not all sections are mapped, and some types of object
+	// files don't have any mapped address space at all (for example,
+	// ELF relocatable objects).
 	//
 	// TODO: Reconsider this API. Eventually it would be nice to be able
 	// to handle addresses from relocated PIE images and core files. Do
 	// those just implement the File interface and present the
 	// underlying file relocated to the target addresses given by the
 	// PIE loading/core file?
+	//
+	// TODO: Does this need to be a method on File at all or can it be a
+	// global function?
 	ResolveAddr(addr uint64) *Section
 
 	// Sym returns i'th symbol. If i is our of range, it panics.
@@ -171,6 +174,7 @@ type sectionFlags uint8
 const (
 	sectionFlagReadOnly sectionFlags = 1 << iota
 	sectionFlagZeroInitialized
+	sectionFlagMapped
 )
 
 // ReadOnly indicates a section's data is read-only.
@@ -198,6 +202,26 @@ func (s *SectionFlags) SetZeroInitialized(v bool) {
 		s.f |= sectionFlagZeroInitialized
 	} else {
 		s.f &^= sectionFlagZeroInitialized
+	}
+}
+
+// Mapped indicates a section is mapped into the executable address
+// space.
+//
+// Because mapped sections are loaded into an address space, they should
+// not overlap. Addresses in one mapped section may refer to another
+// mapped section without any relocations (though mapped sections may
+// still be relocatable).
+func (s SectionFlags) Mapped() bool {
+	return s.f&sectionFlagMapped != 0
+}
+
+// SetMapped sets the Mapped flag to v.
+func (s *SectionFlags) SetMapped(v bool) {
+	if v {
+		s.f |= sectionFlagMapped
+	} else {
+		s.f &^= sectionFlagMapped
 	}
 }
 
