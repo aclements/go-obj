@@ -19,7 +19,7 @@ var symTests = map[string]map[int]Sym{
 		// Data symbol.
 		52: {"data_start", &Section{Name: ".data"}, 0x404020, 0, SymData, SymFlags{}},
 		// BSS symbol.
-		38: {"completed.0", &Section{Name: ".bss"}, 0x404030, 1, SymBSS, local},
+		38: {"completed.0", &Section{Name: ".bss"}, 0x404030, 1, SymData, local},
 		// Undefined dynamic symbol.
 		69 + 0: {"puts", nil, 0, 0, SymUndef, SymFlags{}},
 		// Test section symbol's name.

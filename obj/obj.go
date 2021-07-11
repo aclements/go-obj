@@ -140,6 +140,10 @@ type Section struct {
 	// section that is all zeros may not be represented on disk at all,
 	// or the section on disk may be compressed.
 	Size uint64
+
+	// SectionFlags stores flags for this section. This field is
+	// embedded so Section inherits the methods of SectionFlags.
+	SectionFlags
 }
 
 // Data reads size bytes of data from this section, starting at the
@@ -155,6 +159,46 @@ func (s *Section) Data(addr, size uint64) (*Data, error) {
 // Bounds returns the starting address and size in bytes of Section s.
 func (s *Section) Bounds() (addr, size uint64) {
 	return s.Addr, s.Size
+}
+
+// SectionFlags is a set of symbol flags.
+type SectionFlags struct {
+	f sectionFlags
+}
+
+type sectionFlags uint8
+
+const (
+	sectionFlagReadOnly sectionFlags = 1 << iota
+	sectionFlagZeroInitialized
+)
+
+// ReadOnly indicates a section's data is read-only.
+func (s SectionFlags) ReadOnly() bool {
+	return s.f&sectionFlagReadOnly != 0
+}
+
+// SetReadOnly sets the ReadOnly flag to v.
+func (s *SectionFlags) SetReadOnly(v bool) {
+	if v {
+		s.f |= sectionFlagReadOnly
+	} else {
+		s.f &^= sectionFlagReadOnly
+	}
+}
+
+// ZeroInitialized indicates a section is in a zero-initialized section.
+func (s SectionFlags) ZeroInitialize() bool {
+	return s.f&sectionFlagReadOnly != 0
+}
+
+// SetZeroInitialized sets the ZeroInitialized flag to v.
+func (s *SectionFlags) SetZeroInitialized(v bool) {
+	if v {
+		s.f |= sectionFlagZeroInitialized
+	} else {
+		s.f &^= sectionFlagZeroInitialized
+	}
 }
 
 // roundDown2 to rounds x down to a multiple of y, where y must be a

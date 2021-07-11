@@ -100,26 +100,19 @@ func (f *elfFile) Sym(i SymID) Sym {
 		case elf.SHN_UNDEF:
 			kind = SymUndef
 		case elf.SHN_COMMON:
-			kind = SymBSS
+			kind = SymData
 		case elf.SHN_ABS:
 			kind = SymAbsolute
 		default:
-			if es == nil {
+			if es == nil || es.elf.Flags&elf.SHF_ALLOC == 0 {
 				// Leave unknown.
 				break
 			}
 			// Determine kind by looking at section flags.
-			switch es.elf.Flags & (elf.SHF_WRITE | elf.SHF_ALLOC | elf.SHF_EXECINSTR) {
-			case elf.SHF_ALLOC | elf.SHF_EXECINSTR:
+			if es.elf.Flags&elf.SHF_EXECINSTR != 0 {
 				kind = SymText
-			case elf.SHF_ALLOC:
-				kind = SymROData
-			case elf.SHF_ALLOC | elf.SHF_WRITE:
-				if es.elf.Type == elf.SHT_NOBITS {
-					kind = SymBSS
-				} else {
-					kind = SymData
-				}
+			} else {
+				kind = SymData
 			}
 		}
 	}

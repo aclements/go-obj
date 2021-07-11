@@ -130,6 +130,12 @@ func openElf(r io.ReaderAt) (bool, File, error) {
 			Addr:  elfSect.Addr,
 			Size:  elfSect.Size,
 		}
+		if elfSect.Flags&elf.SHF_WRITE == 0 {
+			s.SetReadOnly(true)
+		}
+		if elfSect.Type == elf.SHT_NOBITS {
+			s.SetZeroInitialized(true)
+		}
 
 		es := &elfSection{Section: s, elf: elfSect}
 		f.sections = append(f.sections, es)

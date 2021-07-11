@@ -44,10 +44,10 @@ type Sym struct {
 	SymFlags
 }
 
-// SymKind indicates the general kind of a symbol. These generally correspond to
-// "nm" symbol types, however, the exact mappings from different object formats
-// to these kinds is generally fuzzy. Different versions of the obj package may
-// change how symbols are categorized.
+// SymKind indicates the general kind of a symbol. The exact mappings
+// from different object formats to these kinds is generally fuzzy, so
+// different versions of the obj package may change how symbols are
+// categorized.
 type SymKind uint8
 
 const (
@@ -59,12 +59,9 @@ const (
 	SymUndef SymKind = 'U'
 	// SymText symbols are in an executable code section.
 	SymText SymKind = 'T'
-	// SymData symbols are in an initialized writable data section.
+	// SymData symbols are in a data section. This includes read-only
+	// and zero-initialized (BSS) data.
 	SymData SymKind = 'D'
-	// SymROData symbols are in an initialized read-only data section.
-	SymROData SymKind = 'R'
-	// SymBSS symbols are in zero-initialized data sections.
-	SymBSS SymKind = 'B'
 	// SymAbsolute symbols have an absolute value that won't be changed by
 	// linking. Generally, the "value" of an absolute symbol is not an address
 	// like most symbols, but the actual value of the symbol.
@@ -89,7 +86,6 @@ type symFlags uint8
 
 const (
 	symFlagLocal symFlags = 1 << iota
-
 	symFlagSizeSynthesized
 
 	// TODO: Indicate which symbol table this comes from for formats that
