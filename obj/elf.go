@@ -390,7 +390,7 @@ func (f *elfFile) elfSectionData(s *elfSection, addr, size uint64, d *Data) erro
 	// Construct data.
 	//
 	// TODO: Slice down relocs?
-	*d = Data{Addr: addr, P: bytes[addr-es.Addr:][:size], R: relocs, Layout: f.arch.Layout}
+	*d = Data{Addr: addr, B: bytes[addr-es.Addr:][:size], R: relocs, Layout: f.arch.Layout}
 
 	return nil
 }

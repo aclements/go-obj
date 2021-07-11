@@ -19,8 +19,8 @@ type Data struct {
 	// of the section or symbol.
 	Addr uint64
 
-	// P stores the raw byte data. Callers must not modify this.
-	P []byte
+	// B stores the raw byte data. Callers must not modify this.
+	B []byte
 
 	// R stores the relocations applied to this Data in increasing
 	// address order.
@@ -49,8 +49,8 @@ func NewReader(d *Data) *Reader {
 // range for r's Data, it panics.
 func (r *Reader) SetAddr(addr uint64) {
 	o := int(addr - r.d.Addr)
-	if addr < r.d.Addr || o >= len(r.d.P) {
-		panic(fmt.Sprintf("address 0x%x out of data's range [0x%x,0x%x)", addr, r.d.Addr, r.d.Addr+uint64(len(r.d.P))))
+	if addr < r.d.Addr || o >= len(r.d.B) {
+		panic(fmt.Sprintf("address 0x%x out of data's range [0x%x,0x%x)", addr, r.d.Addr, r.d.Addr+uint64(len(r.d.B))))
 	}
 	r.p = o
 }
@@ -63,43 +63,43 @@ func (r *Reader) Addr() uint64 {
 // SetOffset moves r's cursor to the given offset from the beginning of
 // r's data.
 func (r *Reader) SetOffset(offset int) {
-	if offset < 0 || offset >= len(r.d.P) {
+	if offset < 0 || offset >= len(r.d.B) {
 		r.badOffset(offset)
 	}
 	r.p = offset
 }
 
 func (r *Reader) badOffset(offset int) {
-	panic(fmt.Sprintf("offset %d out of data's range [0,%d)", offset, len(r.d.P)))
+	panic(fmt.Sprintf("offset %d out of data's range [0,%d)", offset, len(r.d.B)))
 }
 
 // Avail returns the number of bytes remaining in r's Data.
 func (r *Reader) Avail() int {
-	return len(r.d.P) - r.p
+	return len(r.d.B) - r.p
 }
 
 func (r *Reader) Uint8() uint8 {
 	o := r.p
 	r.p++
-	return r.d.P[o]
+	return r.d.B[o]
 }
 
 func (r *Reader) Uint16() uint16 {
 	o := r.p
 	r.p += 2
-	return r.d.Layout.Uint16(r.d.P[o : o+2])
+	return r.d.Layout.Uint16(r.d.B[o : o+2])
 }
 
 func (r *Reader) Uint32() uint32 {
 	o := r.p
 	r.p += 4
-	return r.d.Layout.Uint32(r.d.P[o : o+4])
+	return r.d.Layout.Uint32(r.d.B[o : o+4])
 }
 
 func (r *Reader) Uint64() uint64 {
 	o := r.p
 	r.p += 8
-	return r.d.Layout.Uint64(r.d.P[o : o+8])
+	return r.d.Layout.Uint64(r.d.B[o : o+8])
 }
 
 func (r *Reader) Int8() int8   { return int8(r.Uint8()) }
@@ -111,16 +111,16 @@ func (r *Reader) Int64() int64 { return int64(r.Uint64()) }
 func (r *Reader) Word() uint64 {
 	o := r.p
 	r.p += r.d.Layout.WordSize()
-	return r.d.Layout.Word(r.d.P[o:])
+	return r.d.Layout.Word(r.d.B[o:])
 }
 
 // CString reads a NULL-terminated string. The result omits the final
 // NULL byte. If there is no NULL, this reads to the end of r's Data.
 func (r *Reader) CString() []byte {
-	s := r.d.P[r.p:]
+	s := r.d.B[r.p:]
 	n := bytes.IndexByte(s, 0)
 	if n < 0 {
-		r.p = len(r.d.P)
+		r.p = len(r.d.B)
 		return s
 	}
 	r.p += n + 1

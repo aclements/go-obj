@@ -86,7 +86,7 @@ func TestElfSyms(t *testing.T) {
 			data, err := main.Data(main.Bounds())
 			if err != nil {
 				t.Errorf("symbol main: error getting data: %v", err)
-			} else if !bytes.Equal(mainData, data.P) {
+			} else if !bytes.Equal(mainData, data.B) {
 				t.Errorf("symbol main: data not as expected")
 			}
 		}

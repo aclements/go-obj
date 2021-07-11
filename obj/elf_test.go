@@ -238,14 +238,14 @@ func TestElfSections(t *testing.T) {
 			data, err := text.Data(text.Bounds())
 			if err != nil {
 				t.Errorf("section .text: error getting data: %v", err)
-			} else if !bytes.Equal(data.P, test.textData) {
+			} else if !bytes.Equal(data.B, test.textData) {
 				t.Errorf("section .text: data not as expected")
 			}
 			// Check loading a sub-slice of the data.
 			data, err = text.Data(text.Addr+1, 8)
 			if err != nil {
 				t.Errorf("section .text: error getting data: %v", err)
-			} else if !bytes.Equal(data.P, test.textData[1:][:8]) {
+			} else if !bytes.Equal(data.B, test.textData[1:][:8]) {
 				t.Errorf("section .text: sliced data not as expected")
 			}
 		}
@@ -256,7 +256,7 @@ func TestElfSections(t *testing.T) {
 			data, err := info.Data(info.Bounds())
 			if err != nil {
 				t.Errorf("section .debug_info: error getting data: %v", err)
-			} else if !bytes.Equal(data.P, test.debugInfoData) {
+			} else if !bytes.Equal(data.B, test.debugInfoData) {
 				t.Errorf("section .debug_info: data not as expected")
 			}
 		}
@@ -266,10 +266,10 @@ func TestElfSections(t *testing.T) {
 		data, err := bss.Data(bss.Bounds())
 		if err != nil {
 			t.Errorf("section .bss: error getting data: %v", err)
-		} else if uint64(len(data.P)) != bss.Size {
-			t.Errorf("section .bss: want %d bytes, got %d", bss.Size, len(data.P))
+		} else if uint64(len(data.B)) != bss.Size {
+			t.Errorf("section .bss: want %d bytes, got %d", bss.Size, len(data.B))
 		} else {
-			for i, b := range data.P {
+			for i, b := range data.B {
 				if b != 0 {
 					t.Errorf("section .bss: byte %d is not 0", i)
 					break
