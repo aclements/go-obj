@@ -149,6 +149,14 @@ type Section struct {
 	SectionFlags
 }
 
+// String returns the name of section s.
+func (s *Section) String() string {
+	if s == nil {
+		return "<nil>"
+	}
+	return s.Name
+}
+
 // Data reads size bytes of data from this section, starting at the
 // given address. It panics if the requested byte range is out of range
 // for the section.

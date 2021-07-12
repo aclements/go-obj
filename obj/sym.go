@@ -6,6 +6,7 @@ package obj
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -21,6 +22,13 @@ type SymID uint32
 
 // NoSym is a placeholder SymID used to indicate "no symbol".
 const NoSym = ^SymID(0)
+
+func (id SymID) String() string {
+	if id == NoSym {
+		return "NoSym"
+	}
+	return strconv.FormatUint(uint64(id), 10)
+}
 
 // A Sym is a symbol in an object file.
 type Sym struct {
@@ -140,6 +148,14 @@ func (s SymFlags) String() string {
 	}
 	buf.WriteByte('}')
 	return buf.String()
+}
+
+// String returns the name of symbol s.
+func (s *Sym) String() string {
+	if s == nil {
+		return "<nil>"
+	}
+	return s.Name
 }
 
 // Data reads size bytes of data from this symbol, starting at the given
