@@ -5,6 +5,7 @@
 package obj
 
 import (
+	"debug/dwarf"
 	"debug/elf"
 	"fmt"
 	"io"
@@ -285,11 +286,19 @@ func (f *elfFile) Info() FileInfo {
 	return FileInfo{f.arch}
 }
 
+func (f *elfFile) AsDebugDwarf() (*dwarf.Data, error) {
+	return f.f.DWARF()
+}
+
+// Assert that elfFile implements AsDebugDwarf.
+var _ AsDebugDwarf = (*elfFile)(nil)
+
 // AsDebugElf is implemented by File types that can return an underlying
 // *debug/elf.File for format-specific access. AsDebugElf may return
 // nil, so the caller must both check that the type implements
 // AsDebugElf and check the result of calling AsDebugElf.
 type AsDebugElf interface {
+	File
 	AsDebugElf() *elf.File
 }
 

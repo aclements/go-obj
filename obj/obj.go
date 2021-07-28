@@ -7,6 +7,7 @@
 package obj
 
 import (
+	"debug/dwarf"
 	"fmt"
 	"io"
 
@@ -91,9 +92,15 @@ type File interface {
 	// If an object file has more than one symbol table, they will be
 	// concatenated. As a result, the "same" symbol may appear multiple times.
 	NumSyms() SymID
+}
 
-	// TODO: AsDWARFData interface?
-	//DWARF() (*dwarf.Data, error)
+// AsDebugDwarf is implemented by File types that can return their
+// *debug/dwarf.Data DWARF data. AsDebugDwarf may return nil, so the
+// caller must both check that the type implements AsDebugDwarf and
+// check the result of calling AsDebugDwarf.
+type AsDebugDwarf interface {
+	File
+	AsDebugDwarf() (*dwarf.Data, error)
 }
 
 type FileInfo struct {
