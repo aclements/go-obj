@@ -57,6 +57,8 @@ type Control struct {
 	Target      Arg
 }
 
+//go:generate stringer -type=ControlType
+
 type ControlType uint8
 
 const (
