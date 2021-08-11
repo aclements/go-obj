@@ -53,7 +53,7 @@ type Inst interface {
 type Control struct {
 	Type        ControlType
 	Conditional bool
-	TargetPC    uint64
+	TargetPC    uint64 // ^0 if unknown
 	Target      Arg
 }
 

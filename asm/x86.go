@@ -62,6 +62,7 @@ func (i *x86Inst) Len() int {
 
 func (i *x86Inst) Control() Control {
 	var c Control
+	c.TargetPC = ^uint64(0)
 
 	// Handle REP-prefixed instructions.
 	for _, pfx := range i.Inst.Prefix {
