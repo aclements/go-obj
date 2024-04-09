@@ -422,7 +422,7 @@ func (f *elfFile) sectionBytesUncached(s *elfSection) (data []byte, mmaped []byt
 		// avoid bloating the Go heap.
 		size := roundUp2(es.Size, f.pageSize)
 		if size > 0 {
-			data, err = syscall.Mmap(-1, 0, int(size), syscall.PROT_READ, syscall.MAP_SHARED|syscall.MAP_ANONYMOUS)
+			data, err = syscall.Mmap(-1, 0, int(size), syscall.PROT_READ, syscall.MAP_SHARED|syscall.MAP_ANON)
 			if err == nil {
 				if testMmapSection != nil {
 					testMmapSection(true)
