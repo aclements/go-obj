@@ -67,7 +67,7 @@ var elfArches = map[elf.Machine]elfArch{
 	elf.EM_386:    {arch.I386, rcElf386},
 }
 
-func openElf(r io.ReaderAt) (bool, File, error) {
+func openELF(r io.ReaderAt) (bool, File, error) {
 	// Is this an ELF file?
 	var magic [4]uint8
 	if _, err := r.ReadAt(magic[0:], 0); err != nil {

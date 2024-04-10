@@ -23,6 +23,7 @@ type Arch struct {
 
 var (
 	AMD64 = &Arch{Layout{0, 8}, "amd64", 0}
+	ARM64 = &Arch{Layout{0, 8}, "arm64", 0}
 	I386  = &Arch{Layout{0, 4}, "386", 0}
 )
 

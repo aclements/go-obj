@@ -20,6 +20,8 @@ func Disasm(arch *arch.Arch, text []byte, pc uint64) (Seq, error) {
 		return disasmX86(text, pc, 64), nil
 	case "386":
 		return disasmX86(text, pc, 32), nil
+	case "arm64":
+		return disasmARM64(text, pc), nil
 	}
 	return nil, fmt.Errorf("unsupported assembly architecture: %s", arch)
 }
