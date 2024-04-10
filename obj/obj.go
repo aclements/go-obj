@@ -18,13 +18,13 @@ import (
 
 // Open attempts to open r as a known object file format.
 func Open(r io.ReaderAt) (File, error) {
-	if isElf, f, err := openElf(r); isElf {
+	if isELF, f, err := openELF(r); isELF {
 		return f, err
 	}
-	// if isPE, f, err := openPE(r); isPE {
-	// 	return f, err
-	// }
-	return nil, fmt.Errorf("unrecognized object file format")
+	if isMachO, f, err := openMachO(r); isMachO {
+		return f, err
+	}
+	return nil, fmt.Errorf("unrecognized object file format (must be ELF or MachO, no PE yet)")
 }
 
 // A File represents an object file.

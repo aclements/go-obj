@@ -67,7 +67,7 @@ var elfArches = map[elf.Machine]elfArch{
 	elf.EM_386:    {arch.I386, rcElf386},
 }
 
-func openElf(r io.ReaderAt) (bool, File, error) {
+func openELF(r io.ReaderAt) (bool, File, error) {
 	// Is this an ELF file?
 	var magic [4]uint8
 	if _, err := r.ReadAt(magic[0:], 0); err != nil {
@@ -422,7 +422,7 @@ func (f *elfFile) sectionBytesUncached(s *elfSection) (data []byte, mmaped []byt
 		// avoid bloating the Go heap.
 		size := roundUp2(es.Size, f.pageSize)
 		if size > 0 {
-			data, err = syscall.Mmap(-1, 0, int(size), syscall.PROT_READ, syscall.MAP_SHARED|syscall.MAP_ANONYMOUS)
+			data, err = syscall.Mmap(-1, 0, int(size), syscall.PROT_READ, syscall.MAP_SHARED|syscall.MAP_ANON)
 			if err == nil {
 				if testMmapSection != nil {
 					testMmapSection(true)
